@@ -6,21 +6,15 @@ It deploys a master with replicated slaves, as well as replicated redis sentinel
 
 ## Build configuration
 
-1. Set up git source secret
-
-    ```shell
-        oc secret new-basicauth git --username=<username> --password=<password>
-    ```
-2. Create image stream and build config
+1. Create image stream and build config
 
     ```shell
         oc process -f build/redis-build.yml \
             -p REDIS_IMAGE_NAME=redis-ha \
             -p GIT_REPO=https://github.com/openlab-red/redis-ha.git \
-            -p GIT_SECRET=git \
             | oc create -f -
     ```
-3. Start the build
+2. Start the build
 
     ```shell
         oc start-build redis-ha-build

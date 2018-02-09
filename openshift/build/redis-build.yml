@@ -29,8 +29,6 @@ objects:
     source:
       git:
         uri: ${GIT_REPO}
-      sourceSecret:
-        name: ${GIT_SECRET}
       type: Git
     strategy:
       dockerStrategy:
@@ -48,7 +46,3 @@ parameters:
 - name: GIT_REPO
   description: Name of the git repo.
   required: true
-- name: GIT_SECRET
-  description: Name of the git secret.
-  required: true
-  value: 'git'
