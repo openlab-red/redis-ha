@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: Template
+objects:
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${REDIS_SERVICE_PREFIX}-redis-master
+      ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+      ${REDIS_SERVICE_PREFIX}-redis-master: "true"
+      role: master
+    name: ${REDIS_SERVICE_PREFIX}-redis-master
+  spec:
+    replicas: 1
+    selector:
+      app: ${REDIS_SERVICE_PREFIX}-redis-master
+      ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+      ${REDIS_SERVICE_PREFIX}-redis-master: "true"
+      role: master
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${REDIS_SERVICE_PREFIX}-redis-master
+          ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+          ${REDIS_SERVICE_PREFIX}-redis-master: "true"
+          role: master
+      spec:
+        containers:
+        - image: ${REDIS_IMAGE}
+          imagePullPolicy: Always
+          name: ${REDIS_SERVICE_PREFIX}-redis
+          env:
+            - name: MASTER
+              value: "true"
+            - name: REDIS_DATA_MAX_AGE
+              value: ${REDIS_DATA_MAX_AGE}
+          volumeMounts:
+            - mountPath: /var/lib/redis/redis-slave/data
+              name: data
+            - mountPath: /var/lib/redis/data
+              name: data
+          ports:
+            - containerPort: 6379
+          resources: {}
+        - image: ${REDIS_IMAGE}
+          imagePullPolicy: Always
+          name: ${REDIS_SERVICE_PREFIX}-sentinel
+          resources: {}
+          ports:
+            - containerPort: 26379
+          env:
+            - name: SENTINEL
+              value: "true"
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: ${REDIS_PV}
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${REDIS_SERVICE_PREFIX}-redis
+        - ${REDIS_SERVICE_PREFIX}-sentinel
+        from:
+          kind: ImageStreamTag
+          name: ${REDIS_IMAGE}
+      type: ImageChange
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: ${REDIS_SERVICE_PREFIX}-master
+      role: service
+    name: ${REDIS_SERVICE_PREFIX}-redis-master
+  spec:
+    ports:
+      - port: 6379
+        targetPort: 6379
+    selector:
+      ${REDIS_SERVICE_PREFIX}-redis-master: "true"
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: ${REDIS_SERVICE_PREFIX}-sentinel
+      role: ${REDIS_SERVICE_PREFIX}-service
+    name: ${REDIS_SERVICE_PREFIX}-redis-sentinel
+  spec:
+    ports:
+      - port: 26379
+        targetPort: 26379
+    selector:
+      ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+      
+parameters:
+- name: REDIS_SERVICE_PREFIX
+  description: Name of the redis service. It is used as the prefix for all components.
+  required: true
+- name: REDIS_IMAGE
+  description: Location and name of the Redis Sentinel image.
+  required: true
+- name: REDIS_PV
+  description: Name of the Redis PV to bind.
+  required: true
+- name: REDIS_DATA_MAX_AGE
+  description: Maximal age of slave data directories in days.
+  required: true
+  value: "4"

@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Template
+objects:
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${REDIS_SERVICE_PREFIX}-redis-sentinel
+      ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+    name: ${REDIS_SERVICE_PREFIX}-redis-sentinel
+  spec:
+    replicas: 5
+    selector:
+      app: ${REDIS_SERVICE_PREFIX}-redis-sentinel
+      ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 0
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+    template:
+      metadata:
+        labels:
+          app: ${REDIS_SERVICE_PREFIX}-redis-sentinel
+          ${REDIS_SERVICE_PREFIX}-redis-sentinel: "true"
+      spec:
+        containers:
+        - image: ${REDIS_IMAGE}
+          imagePullPolicy: Always
+          name: ${REDIS_SERVICE_PREFIX}-sentinel
+          env:
+            - name: SENTINEL
+              value: "true"
+            - name: REDIS_SENTINEL_SERVICE_HOST
+              value: ${REDIS_SERVICE_PREFIX}-redis-sentinel
+            - name: REDIS_SENTINEL_SERVICE_PORT
+              value: ${REDIS_SENTINEL_SERVICE_PORT}
+            - name: REDIS_DOWN_AFTER_MILLIS
+              value: ${REDIS_DOWN_AFTER_MILLIS}
+            - name: REDIS_FAILOVER_TIMEOUT
+              value: ${REDIS_FAILOVER_TIMEOUT}
+          ports:
+            - containerPort: 26379
+          resources: {}
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${REDIS_SERVICE_PREFIX}-sentinel
+        from:
+          kind: ImageStreamTag
+          name: ${REDIS_IMAGE}
+      type: ImageChange
+
+parameters:
+- name: REDIS_SERVICE_PREFIX
+  description: Name of the redis service. It is used as the prefix for all components.                  
+  required: true                                                                                        
+- name: REDIS_IMAGE
+  description: Location and name of the Redis Sentinel image.                                           
+  required: true                                                                                        
+- name: REDIS_SENTINEL_SERVICE_PORT
+  description: Port of the bootstrap redis sentinel service.
+  required: true
+  value: "26379"
+- name: REDIS_DOWN_AFTER_MILLIS
+  description: The time in milliseconds an instance should not be reachable for a Sentinel starting to think it is down.
+  required: false
+  value: "20000"
+- name: REDIS_FAILOVER_TIMEOUT
+  description: Specifies the failover timeout in milliseconds.
+  required: false
+  value: "30000"

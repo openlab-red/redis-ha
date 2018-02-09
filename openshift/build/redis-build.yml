@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Template
+objects:
+
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${REDIS_IMAGE_NAME}
+      name: ${REDIS_IMAGE_NAME}
+    name: ${REDIS_IMAGE_NAME}
+  spec: {}
+
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${REDIS_IMAGE_NAME}-build
+      name: redis
+    name: ${REDIS_IMAGE_NAME}-build
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${REDIS_IMAGE_NAME}:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: ${GIT_REPO}
+      sourceSecret:
+        name: ${GIT_SECRET}
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redis:latest
+          namespace: openshift
+      type: Docker
+    triggers: []
+
+parameters:
+- name: REDIS_IMAGE_NAME
+  description: Name of the image to build.
+  required: true
+- name: GIT_REPO
+  description: Name of the git repo.
+  required: true
+- name: GIT_SECRET
+  description: Name of the git secret.
+  required: true
+  value: 'git'
