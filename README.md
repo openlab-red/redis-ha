@@ -16,7 +16,7 @@ It deploys a master with replicated slaves, as well as replicated redis sentinel
     ```shell
         oc process -f build/redis-build.yml \
             -p REDIS_IMAGE_NAME=redis-ha \
-            -p GIT_REPO=https://gitlab.com/3scale-sbb/redis-ha.git \
+            -p GIT_REPO=https://github.com/openlab-red/redis-ha.git \
             -p GIT_SECRET=git \
             | oc create -f -
     ```
