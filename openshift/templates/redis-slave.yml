@@ -33,7 +33,7 @@ objects:
           imagePullPolicy: Always
           name: ${REDIS_SERVICE_PREFIX}-redis
           volumeMounts:
-            - mountPath: /var/lib/redis/redis-slave/data
+            - mountPath: /var/lib/redis/data
               name: data
           ports:
             - containerPort: 6379

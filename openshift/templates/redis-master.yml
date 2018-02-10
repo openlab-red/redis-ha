@@ -45,8 +45,6 @@ objects:
             - name: REDIS_DATA_MAX_AGE
               value: ${REDIS_DATA_MAX_AGE}
           volumeMounts:
-            - mountPath: /var/lib/redis/redis-slave/data
-              name: data
             - mountPath: /var/lib/redis/data
               name: data
           ports:

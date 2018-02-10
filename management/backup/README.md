@@ -35,8 +35,8 @@ For persistent point of view the data that matters are those on the slave direct
 5. Backup your data
 
     ```shell
-        oc rsync $REDIS_MASTER:/var/lib/redis/redis-slave/data/$REDIS_MASTER/appendonly.aof backup/
-        oc rsync $REDIS_MASTER:/var/lib/redis/redis-slave/data/$REDIS_MASTER/dump.rdb backup/
+        oc rsync $REDIS_MASTER:/var/lib/redis/data/$REDIS_MASTER/appendonly.aof backup/
+        oc rsync $REDIS_MASTER:/var/lib/redis/data/$REDIS_MASTER/dump.rdb backup/
     ```
 
 6. Restore data during the bootstrap process.

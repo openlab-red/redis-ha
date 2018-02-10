@@ -39,15 +39,12 @@ unset_env_vars
 log_volume_info "${REDIS_DATADIR}"
 log_info 'Running final exec -- Only Redis logs after this point'
 
-# Slave directory
-REDIS_SLAVE_DATADIR=${HOME}/redis-slave/data
-
 REDIS_DATA_MAX_AGE=${REDIS_DATA_MAX_AGE:-3}
 
 # Restore data from the slave if any
 # ignore in case the file are the same
 function restore() {
-  DUMP=$(find ${REDIS_SLAVE_DATADIR} -name dump.rdb -type f -printf "%T@ %p\n"| sort -nr | head -n 1 | cut -d ' ' -f2)
+  DUMP=$(find ${REDIS_DATADIR} -name dump.rdb -type f -printf "%T@ %p\n"| sort -nr | head -n 1 | cut -d ' ' -f2)
 
   if [ ! -z "${DUMP}" ]; then
     APPENDONLY=$(dirname ${DUMP})/appendonly.aof
@@ -61,7 +58,7 @@ function restore() {
 }
 
 function housekeeping() {
-    find ${REDIS_SLAVE_DATADIR} -name dump.rdb -mtime +${REDIS_DATA_MAX_AGE}  -exec sh -c 'rm -fr $(dirname "{}")' \;
+    find ${REDIS_DATADIR} -name dump.rdb -mtime +${REDIS_DATA_MAX_AGE}  -exec sh -c 'rm -fr $(dirname "{}")' \;
 }
 
 function launchmaster() {
@@ -120,10 +117,10 @@ function launchslave() {
     echo "Connecting to master failed.  Waiting..."
     sleep 10
   done
-  mkdir -p ${REDIS_SLAVE_DATADIR}/${REDIS_POD_NAME:-noname}
+  mkdir -p ${REDIS_DATADIR}/${REDIS_POD_NAME:-noname}
   sed -i "s/%master-ip%/${master}/" ${HOME}/redis-slave/redis.conf
   sed -i "s/%master-port%/6379/" ${HOME}/redis-slave/redis.conf
-  sed -i "s/%slave-sub-data%/${REDIS_POD_NAME:-noname}/" ${HOME}/redis-slave/redis.conf
+  sed -i "s/%slave-data%/${REDIS_POD_NAME:-slave}/" ${HOME}/redis-slave/redis.conf
   ${REDIS_PREFIX}/bin/redis-server ${HOME}/redis-slave/redis.conf
 }
 
