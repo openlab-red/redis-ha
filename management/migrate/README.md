@@ -12,8 +12,8 @@
     export REDIS_PREFIX=backend
     export REDIS_NAME=${REDIS_PREFIX}-redis
     
-    oc scale --replicas=0 dc ${REDIS_PREFIX}
-    oc delete dc,svc ${REDIS_PREFIX}
+    oc scale --replicas=0 dc ${REDIS_NAME}
+    oc delete dc,svc ${REDIS_NAME}
 ```
 
 ### Create the bootstrap master and sentinel
@@ -45,8 +45,6 @@ spec:
 ```shell
     oc create -f /tmp/storage.yml
 ```
-
-Mount under the slave data path **/var/lib/redis/redis-slave/data**
 
 ### Create the slave redis
 

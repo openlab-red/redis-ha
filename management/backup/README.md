@@ -1,4 +1,4 @@
-# Backup and Recovery
+# Backup and Restore
 
 When the current master goes down, redis sentinels start the failover to choose new master from the slaves.
 There is not a way to switch back the process.
