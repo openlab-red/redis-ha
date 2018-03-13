@@ -42,9 +42,9 @@ log_info 'Running final exec -- Only Redis logs after this point'
 REDIS_DATA_MAX_AGE=${REDIS_DATA_MAX_AGE:-3}
 REDIS_NAMESPACE=${REDIS_NAMESPACE:-""}
 
-# In case of ovs-subnet or join project
+# In case of ovs-subnet or projects joined
 if [[ "${REDIS_NAMESPACE}" != "" ]]; then
-    REDIS_SENTINEL_SERVICE_HOST=${REDIS_SENTINEL_SERVICE_HOST}.${REDIS_NAMESPACE}
+    export REDIS_SENTINEL_SERVICE_HOST=${REDIS_SENTINEL_SERVICE_HOST}.${REDIS_NAMESPACE}
 fi
 
 # Restore data from the slave if any
