@@ -40,6 +40,12 @@ log_volume_info "${REDIS_DATADIR}"
 log_info 'Running final exec -- Only Redis logs after this point'
 
 REDIS_DATA_MAX_AGE=${REDIS_DATA_MAX_AGE:-3}
+REDIS_NAMESPACE=${REDIS_NAMESPACE:-""}
+
+# In case of ovs-subnet or join project
+if [[ "${REDIS_NAMESPACE}" != "" ]]; then
+    REDIS_SENTINEL_SERVICE_HOST=${REDIS_SENTINEL_SERVICE_HOST}.${REDIS_NAMESPACE}
+fi
 
 # Restore data from the slave if any
 # ignore in case the file are the same
@@ -73,6 +79,7 @@ function launchmaster() {
 }
 
 function launchsentinel() {
+
   while true; do
     master=$(${REDIS_PREFIX}/bin/redis-cli -h ${REDIS_SENTINEL_SERVICE_HOST} -p ${REDIS_SENTINEL_SERVICE_PORT} --csv SENTINEL get-master-addr-by-name mymaster | tr ',' ' ' | cut -d' ' -f1)
     if [[ -n ${master} ]]; then
