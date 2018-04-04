@@ -59,6 +59,8 @@ objects:
           env:
             - name: SENTINEL
               value: "true"
+            - name: REDIS_SENTINEL_SERVICE_HOST
+              value: ${REDIS_SERVICE_PREFIX}-redis-sentinel              
             - name: REDIS_NAMESPACE
               valueFrom:
                 fieldRef:
