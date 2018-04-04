@@ -82,7 +82,7 @@ function launchsentinel() {
   echo "Using Redis Sentinel Host ${REDIS_SENTINEL_SERVICE_HOST}"
   
   while true; do
-    master=$(${REDIS_PREFIX}/bin/redis-cli -h ${REDIS_SENTINEL_SERVICE_HOST} -p ${REDIS_SENTINEL_SERVICE_PORT} --csv SENTINEL get-master-addr-by-name mymaster | tr ',' ' ' | cut -d' ' -f1)
+    master=$(timeout 5 ${REDIS_PREFIX}/bin/redis-cli -h ${REDIS_SENTINEL_SERVICE_HOST} -p ${REDIS_SENTINEL_SERVICE_PORT} --csv SENTINEL get-master-addr-by-name mymaster | tr ',' ' ' | cut -d' ' -f1)
     if [[ -n ${master} ]]; then
       master="${master//\"}"
     else
@@ -112,7 +112,7 @@ function launchslave() {
   echo "Using Redis Sentinel Host ${REDIS_SENTINEL_SERVICE_HOST}"
   
   while true; do
-    master=$(${REDIS_PREFIX}/bin/redis-cli -h ${REDIS_SENTINEL_SERVICE_HOST} -p ${REDIS_SENTINEL_SERVICE_PORT} --csv SENTINEL get-master-addr-by-name mymaster | tr ',' ' ' | cut -d' ' -f1)
+    master=$(timeout 5 ${REDIS_PREFIX}/bin/redis-cli -h ${REDIS_SENTINEL_SERVICE_HOST} -p ${REDIS_SENTINEL_SERVICE_PORT} --csv SENTINEL get-master-addr-by-name mymaster | tr ',' ' ' | cut -d' ' -f1)
     if [[ -n ${master} ]]; then
       master="${master//\"}"
     else
