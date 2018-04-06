@@ -59,14 +59,6 @@ objects:
           env:
             - name: SENTINEL
               value: "true"
-            - name: REDIS_SENTINEL_SERVICE_HOST
-              value: ${REDIS_SERVICE_PREFIX}-redis-sentinel
-            - name: REDIS_SENTINEL_SERVICE_PORT
-              value: ${REDIS_SENTINEL_SERVICE_PORT}  
-            - name: REDIS_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         securityContext: {}
@@ -130,7 +122,3 @@ parameters:
   description: Maximal age of slave data directories in days.
   required: true
   value: "4"
-- name: REDIS_SENTINEL_SERVICE_PORT
-  description: Port of the redis sentinel service
-  required: true
-  value: "26379"
