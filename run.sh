@@ -86,6 +86,7 @@ function launchsentinel() {
     if [[ -n ${master} ]]; then
       master="${master//\"}"
     else
+      echo "Using $(hostname -i) as master"
       master=$(hostname -i)
     fi
 
@@ -93,7 +94,7 @@ function launchsentinel() {
     if [[ "$?" == "0" ]]; then
       break
     fi
-    echo "Connecting to master failed.  Waiting..."
+    echo "Connecting to master ${master} failed.  Waiting..."
     sleep 10
   done
 
